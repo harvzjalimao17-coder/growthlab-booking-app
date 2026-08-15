@@ -1,0 +1,1483 @@
+/* GrowthLab marketing landing page — scoped via CSS Modules for safe class
+   isolation, but every color aliases the SAME global tokens defined in
+   app/globals.css (single source of truth), so the landing page, /book,
+   and the confirmation experience are provably one design system. */
+
+.page {
+  --gl-bg: hsl(var(--background));         /* Obsidian */
+  --gl-bg-soft: hsl(var(--background));
+  --gl-surface: hsl(var(--card));          /* Graphite */
+  --gl-surface-2: hsl(var(--popover));     /* Charcoal */
+  --gl-line: hsl(var(--border));
+  --gl-line-soft: hsl(var(--border) / 0.6);
+  --gl-text: hsl(var(--foreground));       /* Warm White */
+  --gl-muted: hsl(var(--muted-foreground));
+  --gl-muted-2: hsl(var(--muted-foreground) / 0.7);
+  --gl-signal: hsl(var(--success));        /* status green — functional only */
+  --gl-signal-dim: hsl(var(--success) / 0.16);
+  --gl-alert: hsl(var(--warning));         /* status amber — functional only */
+  --gl-alert-dim: hsl(var(--warning) / 0.16);
+  --gl-gold: hsl(var(--accent));           /* Gold — GrowthLab brand accent */
+  --gl-gold-dim: hsl(var(--accent) / 0.14);
+  --gl-link: hsl(var(--accent));
+
+  background: var(--gl-bg);
+  color: var(--gl-text);
+}
+
+/* Offsets anchor-jump targets so content isn't hidden under the sticky
+   header (h-20 = 80px) when navigating via #capabilities, #process, etc. */
+.page section[id] {
+  scroll-margin-top: 96px;
+}
+
+.container {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gl-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.eyebrow::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gl-gold);
+  box-shadow: 0 0 0 3px var(--gl-gold-dim);
+}
+
+.sec {
+  padding: 88px 0;
+}
+.secHead {
+  max-width: 640px;
+  margin-bottom: 52px;
+}
+.secHead h2 {
+  font-family: var(--font-fraunces);
+  font-size: clamp(26px, 3vw, 36px);
+  margin: 14px 0 12px;
+  letter-spacing: -0.01em;
+}
+.secHead p {
+  color: var(--gl-muted);
+  font-size: 16px;
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  padding: 88px 0 64px;
+  border-bottom: 1px solid var(--gl-line-soft);
+}
+.heroGrid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 56px;
+  align-items: center;
+}
+.hero h1 {
+  font-family: var(--font-fraunces);
+  font-size: clamp(34px, 4.4vw, 54px);
+  line-height: 1.08;
+  margin: 20px 0 22px;
+  letter-spacing: -0.01em;
+}
+.hero h1 span {
+  color: var(--gl-gold);
+}
+.heroSub {
+  color: var(--gl-muted);
+  font-size: 17px;
+  max-width: 490px;
+  margin-bottom: 32px;
+}
+.heroActions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+.heroNote {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--gl-muted-2);
+}
+
+.btnPrimary {
+  font-weight: 600;
+  font-size: 14.5px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: var(--gl-text);
+  color: var(--gl-bg);
+  transition: transform 0.15s, background 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btnPrimary:hover {
+  transform: translateY(-1px);
+  background: #fff;
+}
+.btnGhost {
+  font-weight: 600;
+  font-size: 14.5px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--gl-line);
+  color: var(--gl-text);
+  transition: border-color 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btnGhost:hover {
+  border-color: var(--gl-muted-2);
+}
+
+/* ---------- Pipeline visual ---------- */
+.pipelineCard {
+  background: var(--gl-surface);
+  border: 1px solid var(--gl-line);
+  border-radius: 14px;
+  padding: 26px 22px 22px;
+}
+.pipelineHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--gl-muted-2);
+}
+.pipeline {
+  display: flex;
+  flex-direction: column;
+}
+.pNode {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--gl-line-soft);
+  background: var(--gl-bg-soft);
+  opacity: 0.45;
+  transition: opacity 0.4s, border-color 0.4s, background 0.4s;
+}
+.pNode .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--gl-muted-2);
+  flex-shrink: 0;
+  transition: background 0.4s, box-shadow 0.4s;
+}
+.pNode .label {
+  font-size: 14px;
+  font-weight: 500;
+}
+.pNode .status {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gl-muted-2);
+}
+.pConnector {
+  height: 20px;
+  width: 1px;
+  background: var(--gl-line);
+  margin-left: 24px;
+}
+.gold {
+  opacity: 1;
+  border-color: var(--gl-gold);
+  background: var(--gl-gold-dim);
+}
+.gold .dot {
+  background: var(--gl-gold);
+  box-shadow: 0 0 0 4px var(--gl-gold-dim);
+}
+.gold .status {
+  color: var(--gl-gold);
+}
+.green {
+  opacity: 1;
+  border-color: var(--gl-signal);
+  background: var(--gl-signal-dim);
+}
+.green .dot {
+  background: var(--gl-signal);
+  box-shadow: 0 0 0 4px var(--gl-signal-dim);
+}
+.green .status {
+  color: var(--gl-signal);
+}
+.neutral {
+  opacity: 1;
+  border-color: var(--gl-muted-2);
+}
+.neutral .dot {
+  background: var(--gl-text);
+}
+
+/* ---------- Stack strip ---------- */
+.stackStrip {
+  border-top: 1px solid var(--gl-line-soft);
+  border-bottom: 1px solid var(--gl-line-soft);
+  padding: 24px 0;
+}
+.stackInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.stackLabel {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gl-muted-2);
+  max-width: 320px;
+}
+.stackItems {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.stackItems span {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--gl-muted);
+}
+
+/* ---------- Competitive edge ---------- */
+.edgeSec {
+  padding: 84px 0 96px;
+  border-bottom: 1px solid var(--gl-line-soft);
+}
+.edgeHead {
+  max-width: 720px;
+  margin-bottom: 46px;
+}
+.edgeHead h2 {
+  font-family: var(--font-fraunces);
+  font-size: clamp(28px, 4vw, 46px);
+  line-height: 1.12;
+  margin: 16px 0 18px;
+  letter-spacing: -0.01em;
+}
+.strike {
+  color: var(--gl-muted-2);
+  text-decoration: line-through;
+  text-decoration-color: var(--gl-line);
+}
+.win {
+  color: var(--gl-gold);
+}
+.edgeHead p {
+  color: var(--gl-muted);
+  font-size: 16.5px;
+  max-width: 560px;
+}
+.compareBar {
+  margin: 40px 0 52px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.compareRow {
+  display: grid;
+  grid-template-columns: 110px 1fr 150px;
+  align-items: center;
+  gap: 16px;
+}
+.compareLabel {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--gl-muted);
+}
+.compareTrack {
+  height: 10px;
+  border-radius: 6px;
+  background: var(--gl-surface-2);
+  border: 1px solid var(--gl-line);
+  overflow: hidden;
+}
+.compareFill {
+  height: 100%;
+  border-radius: 6px;
+  width: 0%;
+  transition: width 1.1s cubic-bezier(0.16, 0.8, 0.3, 1);
+}
+.slow {
+  background: linear-gradient(90deg, rgba(229, 72, 77, 0.5), #e5484d);
+}
+.fast {
+  background: linear-gradient(90deg, var(--gl-gold), hsl(var(--accent) / 0.7));
+}
+.compareValue {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--gl-text);
+  text-align: right;
+}
+.edgeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.edgeCard {
+  background: var(--gl-surface);
+  border: 1px solid var(--gl-line);
+  border-radius: 12px;
+  padding: 26px;
+}
+.edgeCard .tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gl-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 14px;
+  display: block;
+}
+.edgeCard h3 {
+  font-family: var(--font-fraunces);
+  font-size: 17.5px;
+  margin-bottom: 9px;
+}
+.edgeCard p {
+  color: var(--gl-muted);
+  font-size: 14px;
+}
+
+/* ---------- Capability cards ---------- */
+.capGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.capCard {
+  background: var(--gl-surface);
+  border: 1px solid var(--gl-line);
+  border-radius: 12px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+}
+.capIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: var(--gl-surface-2);
+  border: 1px solid var(--gl-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  font-size: 18px;
+}
+.capCard h3 {
+  font-family: var(--font-fraunces);
+  font-size: 19px;
+  margin-bottom: 10px;
+}
+.capCard p {
+  color: var(--gl-muted);
+  font-size: 14.5px;
+  margin-bottom: 18px;
+}
+.capList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 0;
+  margin: 0;
+}
+.capList li {
+  font-size: 13.5px;
+  color: var(--gl-text);
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+.capList li::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gl-gold);
+  margin-top: 7px;
+  flex-shrink: 0;
+}
+.capTag {
+  margin-top: 20px;
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gl-muted-2);
+  border: 1px solid var(--gl-line);
+  padding: 4px 9px;
+  border-radius: 5px;
+}
+
+/* ---------- Process ---------- */
+.processList {
+  display: flex;
+  flex-direction: column;
+}
+.processRow {
+  display: grid;
+  grid-template-columns: 70px 1fr 1.3fr;
+  gap: 24px;
+  padding: 26px 0;
+  border-top: 1px solid var(--gl-line-soft);
+  align-items: start;
+}
+.processRow:last-child {
+  border-bottom: 1px solid var(--gl-line-soft);
+}
+.processNum {
+  font-family: var(--font-mono);
+  color: var(--gl-muted-2);
+  font-size: 14px;
+  padding-top: 3px;
+}
+.processRow h3 {
+  font-family: var(--font-fraunces);
+  font-size: 18px;
+}
+.processRow p {
+  color: var(--gl-muted);
+  font-size: 14.5px;
+}
+
+/* ---------- Demo ---------- */
+.demoWrap {
+  background: var(--gl-surface);
+  border: 1px solid var(--gl-line);
+  border-radius: 16px;
+  padding: 48px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+.demoCopy h2 {
+  font-family: var(--font-fraunces);
+  font-size: 28px;
+  margin: 14px 0 14px;
+}
+.demoCopy p {
+  color: var(--gl-muted);
+  margin-bottom: 24px;
+  font-size: 15.5px;
+}
+.demoStates {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.demoState {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  padding: 10px 12px;
+  border-radius: 7px;
+  border: 1px solid var(--gl-line-soft);
+}
+.demoOk {
+  color: var(--gl-signal);
+  border-color: var(--gl-signal);
+  background: var(--gl-signal-dim);
+}
+.demoErr {
+  color: #e5484d;
+  border-color: #e5484d;
+  background: rgba(229, 72, 77, 0.13);
+}
+.demoVisual {
+  background: var(--gl-bg);
+  border: 1px solid var(--gl-line);
+  border-radius: 12px;
+  padding: 24px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.demoVisual .line {
+  color: var(--gl-muted);
+  margin-bottom: 8px;
+}
+.demoVisual .hi {
+  color: var(--gl-signal);
+}
+
+/* ---------- Principles ---------- */
+.principlesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.principleCard {
+  padding: 26px 0;
+  border-top: 1px solid var(--gl-line-soft);
+}
+.principleCard .num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gl-gold);
+  margin-bottom: 12px;
+  display: block;
+}
+.principleCard h3 {
+  font-family: var(--font-fraunces);
+  font-size: 16.5px;
+  margin-bottom: 8px;
+}
+.principleCard p {
+  color: var(--gl-muted);
+  font-size: 14px;
+}
+
+/* ---------- About ---------- */
+.aboutGrid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 44px;
+  align-items: start;
+}
+.avatar {
+  width: 220px;
+  height: 220px;
+  border-radius: 14px;
+  background: linear-gradient(155deg, var(--gl-surface-2), var(--gl-surface));
+  border: 1px solid var(--gl-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.avatar img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+}
+.aboutRole {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--gl-gold);
+  margin-bottom: 10px;
+  display: block;
+}
+.aboutCopy h2 {
+  font-family: var(--font-fraunces);
+  font-size: 26px;
+  margin-bottom: 14px;
+}
+.aboutCopy p {
+  color: var(--gl-muted);
+  font-size: 15px;
+  margin-bottom: 14px;
+  max-width: 560px;
+}
+.aboutMeta {
+  display: flex;
+  gap: 26px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.aboutMeta div {
+  font-size: 13px;
+}
+.aboutMeta span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gl-muted-2);
+  margin-bottom: 3px;
+}
+.aboutMeta a {
+  color: var(--gl-link);
+}
+
+/* ---------- Final CTA ---------- */
+.ctaSection {
+  text-align: center;
+  padding: 96px 0;
+  border-top: 1px solid var(--gl-line-soft);
+}
+.ctaSection h2 {
+  font-family: var(--font-fraunces);
+  font-size: clamp(28px, 3.6vw, 42px);
+  margin: 16px 0 16px;
+}
+.ctaSection p {
+  color: var(--gl-muted);
+  max-width: 480px;
+  margin: 0 auto 32px;
+}
+.ctaActions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ---------- Capability grid (10 business capabilities) ---------- */
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.featureCard {
+  display: block;
+  background: var(--gl-surface);
+  border: 1px solid var(--gl-line);
+  border-radius: 12px;
+  padding: 24px;
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.featureCard:hover {
+  border-color: var(--gl-gold);
+  transform: translateY(-2px);
+}
+.featureIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--gl-surface-2);
+  border: 1px solid var(--gl-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: var(--gl-gold);
+}
+/* Hierarchy, strongest to weakest: 1) capability title  2) process flow
+   description  3) business outcome. The title carries the most visual
+   weight; the outcome line is intentionally the quietest of the three. */
+.featureCard h3 {
+  font-family: var(--font-fraunces);
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--gl-text);
+  margin-bottom: 8px;
+}
+.featureDesc {
+  color: var(--gl-muted);
+  font-size: 13px;
+  font-weight: 400;
+  margin-bottom: 14px;
+}
+.featureOutcome {
+  font-size: 12.5px;
+  color: var(--gl-muted-2);
+  border-top: 1px solid var(--gl-line-soft);
+  padding-top: 12px;
+}
+.featureOutcome strong {
+  color: var(--gl-muted);
+  font-weight: 500;
+}
+
+/* ---------- Before / After ---------- */
+.baGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.baCol {
+  border-radius: 12px;
+  padding: 28px;
+  border: 1px solid var(--gl-line);
+}
+.baBefore {
+  background: var(--gl-surface);
+}
+.baAfter {
+  background: var(--gl-surface);
+  border-color: var(--gl-gold);
+}
+.baLabel {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+  display: block;
+}
+.baBefore .baLabel {
+  color: var(--gl-muted-2);
+}
+.baAfter .baLabel {
+  color: var(--gl-gold);
+}
+.baList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+}
+.baList li {
+  font-size: 14.5px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.baBefore .baList li {
+  color: var(--gl-muted);
+}
+.baAfter .baList li {
+  color: var(--gl-text);
+}
+
+/* ---------- Automation ecosystem ---------- */
+.ecoFlow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 20px 0;
+}
+.ecoNode {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  padding: 12px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--gl-line);
+  background: var(--gl-surface);
+  color: var(--gl-text);
+}
+.ecoArrow {
+  color: var(--gl-gold);
+  font-size: 16px;
+  padding: 0 10px;
+}
+.ecoMsg {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--gl-gold);
+  margin-top: 24px;
+  letter-spacing: 0.04em;
+}
+
+/* ---------- Post-booking automation reveal (used on /book success) ---------- */
+.revealWrap {
+  max-width: 560px;
+  margin: 0 auto;
+}
+.revealHead {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.revealEyebrow {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gl-gold);
+  display: block;
+  margin-bottom: 10px;
+}
+.revealHead h3 {
+  font-family: var(--font-fraunces);
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+.revealHead p {
+  color: var(--gl-muted);
+  font-size: 14.5px;
+}
+.revealSummary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  background: var(--gl-surface);
+  border: 1px solid var(--gl-line);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin: 22px 0;
+}
+.revealSummary div {
+  font-size: 13px;
+}
+.revealSummary span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--gl-muted-2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 3px;
+}
+.revealStages {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.revealStage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  opacity: 0;
+  transform: translateY(6px);
+  animation: revealIn 0.4s ease-out forwards;
+}
+@keyframes revealIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.revealDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gl-gold);
+  flex-shrink: 0;
+}
+.revealStage.revealFinal .revealDot {
+  background: var(--gl-signal);
+}
+.revealLabel {
+  font-size: 13.5px;
+  color: var(--gl-text);
+}
+.revealNode {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--gl-muted-2);
+}
+.revealFooter {
+  text-align: center;
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--gl-line-soft);
+}
+.revealFooter p:first-child {
+  font-family: var(--font-fraunces);
+  font-size: 17px;
+  margin-bottom: 4px;
+}
+.revealFooter p:last-child {
+  color: var(--gl-muted);
+  font-size: 13.5px;
+}
+
+/* ==========================================================
+   Interactive capability cards — expand panel
+   ========================================================== */
+.capCardBtn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--gl-surface);
+  border: 1px solid var(--gl-line);
+  border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+  font: inherit;
+  color: inherit;
+}
+.capCardBtn:hover {
+  border-color: var(--gl-gold);
+  transform: translateY(-2px);
+}
+.capCardBtn.capCardActive {
+  border-color: var(--gl-gold);
+  background: var(--gl-gold-dim);
+}
+.capCardBtn:focus-visible {
+  outline: 2px solid var(--gl-gold);
+  outline-offset: 2px;
+}
+
+/* Row wrapper: groups one row's cards with the detail panel that may
+   follow it, so DOM order alone places the panel next to the right row
+   at any responsive column count. */
+.capRowWrap {
+  margin-bottom: 20px;
+}
+.capRowWrap:last-child {
+  margin-bottom: 0;
+}
+
+.capDetail {
+  background: var(--gl-surface-2);
+  border: 1px solid var(--gl-gold);
+  border-radius: 14px;
+  padding: 32px;
+  margin-top: 20px;
+}
+.capDetailHead {
+  margin-bottom: 22px;
+}
+.capDetailHead h3 {
+  font-family: var(--font-fraunces);
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.capDetailHead p {
+  color: var(--gl-muted);
+  font-size: 14.5px;
+  max-width: 560px;
+}
+.capDetailCols {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.capDetailCol {
+  border-radius: 10px;
+  padding: 18px;
+  border: 1px solid var(--gl-line);
+}
+.capDetailCol.before {
+  background: var(--gl-surface);
+}
+.capDetailCol.after {
+  background: var(--gl-surface);
+  border-color: var(--gl-gold);
+}
+.capDetailLabel {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+  display: block;
+}
+.capDetailCol.before .capDetailLabel {
+  color: var(--gl-muted-2);
+}
+.capDetailCol.after .capDetailLabel {
+  color: var(--gl-gold);
+}
+.capDetailCol ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+.capDetailCol.before li {
+  color: var(--gl-muted);
+}
+.capFlowCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+.capFlowStep {
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  background: var(--gl-surface);
+  border: 1px solid var(--gl-line);
+}
+.capFlowArrow {
+  display: inline-block;
+  font-size: 13px;
+  color: var(--gl-muted-2);
+  opacity: 0.4;
+  text-shadow: none;
+  transition: color 0.2s;
+  /* Single shared keyframe timeline (5-arrow-slot cycle); each arrow is
+     phase-shifted with a negative delay so exactly one glows at a time and
+     the sequence travels top -> bottom, looping continuously. */
+  animation: capArrowPulse 3900ms ease-in-out infinite;
+  animation-delay: calc(var(--arrow-i, 0) * 600ms);
+}
+@keyframes capArrowPulse {
+  0% {
+    opacity: 0.4;
+    color: var(--gl-muted-2);
+    text-shadow: none;
+  }
+  3% {
+    opacity: 1;
+    color: var(--gl-gold);
+    text-shadow: 0 0 6px hsl(var(--accent) / 0.9), 0 0 14px hsl(var(--accent) / 0.5);
+  }
+  11% {
+    opacity: 1;
+    color: var(--gl-gold);
+    text-shadow: 0 0 6px hsl(var(--accent) / 0.9), 0 0 14px hsl(var(--accent) / 0.5);
+  }
+  16% {
+    opacity: 0.4;
+    color: var(--gl-muted-2);
+    text-shadow: none;
+  }
+  100% {
+    opacity: 0.4;
+    color: var(--gl-muted-2);
+    text-shadow: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .capFlowArrow {
+    animation: none;
+    opacity: 0.6;
+    color: var(--gl-gold);
+    text-shadow: none;
+  }
+}
+.capDetailFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding-top: 20px;
+  border-top: 1px solid var(--gl-line-soft);
+}
+.capDetailFooter p {
+  font-size: 13.5px;
+  color: var(--gl-text);
+}
+.capDetailFooter p strong {
+  color: var(--gl-gold);
+}
+
+/* ==========================================================
+   ROI calculator
+   ========================================================== */
+.roiWrap {
+  background: var(--gl-surface);
+  border: 1px solid var(--gl-line);
+  border-radius: 16px;
+  padding: 40px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+.roiInputs {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.roiField label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13.5px;
+  color: var(--gl-muted);
+  margin-bottom: 8px;
+}
+.roiField label span:last-child {
+  font-family: var(--font-mono);
+  color: var(--gl-gold);
+}
+.roiField input[type="range"] {
+  width: 100%;
+  accent-color: hsl(var(--accent));
+}
+.roiAssumption {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--gl-muted-2);
+}
+.roiResults {
+  background: var(--gl-surface-2);
+  border: 1px solid var(--gl-line);
+  border-radius: 12px;
+  padding: 26px;
+}
+.roiResultRow {
+  margin-bottom: 20px;
+}
+.roiResultLabel {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gl-muted-2);
+  display: block;
+  margin-bottom: 6px;
+}
+.roiResultValue {
+  font-family: var(--font-fraunces);
+  font-size: 30px;
+}
+.roiResultValue.current {
+  color: var(--gl-text);
+}
+.roiResultValue.potential {
+  color: var(--gl-gold);
+}
+.roiNote {
+  font-size: 13.5px;
+  color: var(--gl-muted);
+  padding-top: 16px;
+  border-top: 1px solid var(--gl-line-soft);
+  margin-bottom: 18px;
+}
+
+/* ==========================================================
+   Automation assessment
+   ========================================================== */
+.assessWrap {
+  background: var(--gl-surface);
+  border: 1px solid var(--gl-line);
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.assessProgress {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--gl-muted-2);
+  margin-bottom: 18px;
+}
+.assessQuestion h3 {
+  font-family: var(--font-fraunces);
+  font-size: 20px;
+  margin-bottom: 18px;
+}
+.assessOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.assessOption {
+  text-align: left;
+  padding: 13px 16px;
+  border-radius: 9px;
+  border: 1px solid var(--gl-line);
+  background: var(--gl-surface-2);
+  color: var(--gl-text);
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.assessOption:hover {
+  border-color: var(--gl-gold);
+}
+.assessOption.assessSelected {
+  border-color: var(--gl-gold);
+  background: var(--gl-gold-dim);
+}
+.assessNav {
+  display: flex;
+  justify-content: space-between;
+}
+.assessResultHead {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.assessResultHead span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gl-gold);
+  display: block;
+  margin-bottom: 10px;
+}
+.assessResultHead h3 {
+  font-family: var(--font-fraunces);
+  font-size: 22px;
+}
+.assessResultList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.assessResultItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--gl-gold);
+  background: var(--gl-gold-dim);
+}
+.assessResultNum {
+  font-family: var(--font-mono);
+  color: var(--gl-gold);
+  font-size: 13px;
+}
+.assessResultWhy {
+  font-size: 13.5px;
+  color: var(--gl-muted);
+  margin-bottom: 22px;
+}
+
+/* ==========================================================
+   Automation lab
+   ========================================================== */
+.labWrap {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 32px;
+  align-items: start;
+}
+.labStages {
+  display: flex;
+  flex-direction: column;
+}
+.labStage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--gl-line);
+  background: var(--gl-surface);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+}
+.labStage.labActive {
+  border-color: var(--gl-gold);
+  background: var(--gl-gold-dim);
+}
+.labStageDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gl-muted-2);
+  flex-shrink: 0;
+}
+.labStage.labActive .labStageDot {
+  background: var(--gl-gold);
+}
+.labConnector {
+  height: 16px;
+  width: 1px;
+  background: var(--gl-line);
+  margin-left: 24px;
+}
+.labExplain {
+  background: var(--gl-surface);
+  border: 1px solid var(--gl-line);
+  border-radius: 12px;
+  padding: 26px;
+  min-height: 200px;
+}
+.labExplain span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gl-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: block;
+  margin-bottom: 10px;
+}
+.labExplain h4 {
+  font-family: var(--font-fraunces);
+  font-size: 19px;
+  margin-bottom: 10px;
+}
+.labExplain p {
+  color: var(--gl-muted);
+  font-size: 14px;
+}
+
+/* ==========================================================
+   Business dashboard preview
+   ========================================================== */
+.dashWrap {
+  background: var(--gl-surface);
+  border: 1px solid var(--gl-line);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.dashBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--gl-line-soft);
+  background: var(--gl-surface-2);
+}
+.dashBar span:first-child {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--gl-muted);
+}
+.dashTag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gl-muted-2);
+  border: 1px solid var(--gl-line);
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+.dashGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: var(--gl-line-soft);
+}
+.dashMetric {
+  background: var(--gl-surface);
+  padding: 22px 18px;
+  text-align: center;
+}
+.dashMetricValue {
+  font-family: var(--font-fraunces);
+  font-size: 28px;
+  color: var(--gl-gold);
+}
+.dashMetricLabel {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--gl-muted-2);
+  margin-top: 4px;
+}
+.dashFooter {
+  display: flex;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-top: 1px solid var(--gl-line-soft);
+  font-size: 13px;
+  color: var(--gl-muted);
+}
+.dashFooter strong {
+  color: var(--gl-text);
+}
+
+/* ==========================================================
+   Trust / control section
+   ========================================================== */
+.trustGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+.trustItem {
+  padding: 22px;
+  border-radius: 10px;
+  border: 1px solid var(--gl-line);
+  background: var(--gl-surface);
+}
+.trustItem h4 {
+  font-family: var(--font-fraunces);
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+.trustItem p {
+  color: var(--gl-muted);
+  font-size: 13.5px;
+}
+.trustQuote {
+  text-align: center;
+  font-family: var(--font-fraunces);
+  font-size: 22px;
+  max-width: 640px;
+  margin: 0 auto 32px;
+}
+
+@media (max-width: 860px) {
+  .capDetailCols {
+    grid-template-columns: 1fr;
+  }
+  .roiWrap {
+    grid-template-columns: 1fr;
+    padding: 26px;
+  }
+  .assessWrap {
+    padding: 24px;
+  }
+  .labWrap {
+    grid-template-columns: 1fr;
+  }
+  .dashGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .trustGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .featureGrid {
+    grid-template-columns: 1fr;
+  }
+  .baGrid {
+    grid-template-columns: 1fr;
+  }
+  .revealSummary {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .heroGrid {
+    grid-template-columns: 1fr;
+  }
+  .capGrid {
+    grid-template-columns: 1fr;
+  }
+  .demoWrap {
+    grid-template-columns: 1fr;
+    padding: 30px;
+  }
+  .principlesGrid {
+    grid-template-columns: 1fr;
+  }
+  .edgeGrid {
+    grid-template-columns: 1fr;
+  }
+  .aboutGrid {
+    grid-template-columns: 1fr;
+  }
+  .avatar {
+    width: 120px;
+    height: 120px;
+  }
+  .processRow {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .compareRow {
+    grid-template-columns: 90px 1fr;
+  }
+  .compareValue {
+    grid-column: 2;
+    text-align: left;
+  }
+}

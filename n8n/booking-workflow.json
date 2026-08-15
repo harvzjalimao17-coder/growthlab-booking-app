@@ -1,0 +1,532 @@
+{
+  "name": "Booking Received",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "booking",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": "services",
+        "returnAll": false,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.service.id }}"
+            },
+            {
+              "keyName": "is_active",
+              "condition": "eq",
+              "keyValue": "true"
+            }
+          ]
+        }
+      },
+      "id": "retrieve_service",
+      "name": "Retrieve Service Details",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        0
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "REPLACE_ME",
+          "name": "Supabase - service_role"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": "business_settings",
+        "returnAll": false,
+        "limit": 1
+      },
+      "id": "retrieve_settings",
+      "name": "Retrieve Business Settings",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        0
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "REPLACE_ME",
+          "name": "Supabase - service_role"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": "bookings",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "condition": "neq",
+              "keyValue": "cancelled"
+            }
+          ]
+        }
+      },
+      "id": "get_existing_bookings",
+      "name": "Get Existing Bookings",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        0
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "REPLACE_ME",
+          "name": "Supabase - service_role"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Combines the webhook payload, service, business settings, and existing\n// bookings to decide whether the requested slot can be booked.\n// Returns { isAvailable, startTime, endTime, timezone } for the IF node below.\n//\n// TIMEZONE FIX (Follow-Up Refinement Milestone): the previous version built\n// `new Date(\\`${date}T${time}:00\\`)`, which JS parses as either local-server\n// time or UTC depending on runtime, ignoring the customer's actual selected\n// timezone entirely. That produced a wrong absolute instant for every\n// customer not in the server's own zone, which then propagated into the\n// saved booking, the Google Calendar event, and both emails.\n//\n// This now interprets date+time as wall-clock time IN the customer's\n// selected IANA zone (body.booking.timezone) and converts it to a correct\n// UTC instant, using only built-in Intl (no external timezone library).\n\nconst body = $('Webhook').first().json.body;\nconst service = $('Retrieve Service Details').first().json;\nconst settings = $('Retrieve Business Settings').first().json;\nconst existing = $input.all().map((i) => i.json);\n\nconst customerTz = body.booking.timezone || settings.timezone || 'UTC';\n\nfunction zonedWallClockToUtc(dateStr, timeStr, timeZone) {\n  // Naive guess: treat the wall-clock string as if it were UTC.\n  const naiveUtc = new Date(`${dateStr}T${timeStr}:00Z`);\n  // Render that same instant in the target zone and in UTC, and diff them\n  // to get the zone's real offset at that moment (correctly handles DST).\n  const inZone = new Date(naiveUtc.toLocaleString('en-US', { timeZone }));\n  const inUtc = new Date(naiveUtc.toLocaleString('en-US', { timeZone: 'UTC' }));\n  const offsetMs = inUtc.getTime() - inZone.getTime();\n  return new Date(naiveUtc.getTime() + offsetMs);\n}\n\nconst start = zonedWallClockToUtc(body.booking.date, body.booking.time, customerTz);\nconst end = new Date(start.getTime() + service.duration_minutes * 60000);\n\nconst bufferMs = (settings.buffer_minutes || 0) * 60000;\nconst leadMs = (settings.booking_lead_time_minutes || 0) * 60000;\n\nconst meetsLeadTime = start.getTime() - Date.now() >= leadMs;\n\nconst overlaps = existing.some((b) => {\n  const bStart = new Date(b.start_time).getTime() - bufferMs;\n  const bEnd = new Date(b.end_time).getTime() + bufferMs;\n  return start.getTime() < bEnd && end.getTime() > bStart;\n});\n\nreturn [\n  {\n    json: {\n      isAvailable: settings.is_accepting_bookings && meetsLeadTime && !overlaps,\n      startTime: start.toISOString(),\n      endTime: end.toISOString(),\n      timezone: customerTz,\n    },\n  },\n];"
+      },
+      "id": "check_availability",
+      "name": "Check Availability",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.isAvailable }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if_available",
+      "name": "IF: Is Available",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        80,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": "customers",
+        "upsertColumn": "email",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "full_name",
+              "fieldValue": "={{ $('Webhook').first().json.body.customer.fullName }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $('Webhook').first().json.body.customer.email }}"
+            },
+            {
+              "fieldId": "phone",
+              "fieldValue": "={{ $('Webhook').first().json.body.customer.phone }}"
+            }
+          ]
+        }
+      },
+      "id": "save_customer",
+      "name": "Save Customer",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        340,
+        -120
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "REPLACE_ME",
+          "name": "Supabase - service_role"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "table": "bookings",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "customer_id",
+              "fieldValue": "={{ $json.id }}"
+            },
+            {
+              "fieldId": "service_id",
+              "fieldValue": "={{ $('Retrieve Service Details').first().json.id }}"
+            },
+            {
+              "fieldId": "start_time",
+              "fieldValue": "={{ $('Check Availability').first().json.startTime }}"
+            },
+            {
+              "fieldId": "end_time",
+              "fieldValue": "={{ $('Check Availability').first().json.endTime }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "pending"
+            },
+            {
+              "fieldId": "customer_notes",
+              "fieldValue": "={{ $('Webhook').first().json.body.booking.notes }}"
+            },
+            {
+              "fieldId": "source",
+              "fieldValue": "website"
+            },
+            {
+              "fieldId": "automation_interests",
+              "fieldValue": "={{ $('Webhook').first().json.body.automationInterests }}"
+            },
+            {
+              "fieldId": "automation_description",
+              "fieldValue": "={{ $('Webhook').first().json.body.automationDescription }}"
+            },
+            {
+              "fieldId": "timezone",
+              "fieldValue": "={{ $('Check Availability').first().json.timezone }}"
+            }
+          ]
+        }
+      },
+      "id": "create_booking",
+      "name": "Create Booking",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        560,
+        -120
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "REPLACE_ME",
+          "name": "Supabase - service_role"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "value": "={{ $('Retrieve Business Settings').first().json.google_calendar_id }}",
+          "mode": "id"
+        },
+        "start": "={{ $('Check Availability').first().json.startTime }}",
+        "end": "={{ $('Check Availability').first().json.endTime }}",
+        "additionalFields": {
+          "summary": "={{ $('Retrieve Service Details').first().json.name }} \u2014 {{ $('Webhook').first().json.body.customer.fullName }}",
+          "description": "={{ $('Webhook').first().json.body.booking.notes || '' }}",
+          "attendees": [
+            "={{ $('Webhook').first().json.body.customer.email }}"
+          ]
+        }
+      },
+      "id": "create_calendar_event",
+      "name": "Create Google Calendar Event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [
+        780,
+        -120
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "REPLACE_ME",
+          "name": "Google Calendar"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "bookings",
+        "filterType": "manual",
+        "matchingColumns": "id",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "id",
+              "fieldValue": "={{ $('Create Booking').first().json.id }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "confirmed"
+            },
+            {
+              "fieldId": "google_calendar_event_id",
+              "fieldValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "id": "update_booking",
+      "name": "Update Booking",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        -120
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "REPLACE_ME",
+          "name": "Supabase - service_role"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').first().json.body.customer.email }}",
+        "subject": "Booking Confirmed",
+        "message": "Hello {{ $('Webhook').first().json.body.customer.fullName.split(' ')[0] }},\n\nYour booking has been confirmed.\n\nService:\n{{ $('Retrieve Service Details').first().json.name }}\n\nDate:\n{{ new Date($('Check Availability').first().json.startTime).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: $('Check Availability').first().json.timezone }) }}\n\nTime:\n{{ new Date($('Check Availability').first().json.startTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: $('Check Availability').first().json.timezone }) }}\n\nTimezone:\n{{ $('Check Availability').first().json.timezone }}\n\nStatus:\nConfirmed\n\nReference:\nBK-{{ $('Create Booking').first().json.id.slice(0,8).toUpperCase() }}\n\nWe look forward to speaking with you.\n\nGrowthLab\nAI powered automation systems for growing businesses.",
+        "options": {}
+      },
+      "id": "send_confirmation",
+      "name": "Send Confirmation Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        1220,
+        -160
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_ME",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Retrieve Business Settings').first().json.contact_email }}",
+        "subject": "New GrowthLab Prospect",
+        "message": "NEW GROWTHLAB PROSPECT\n\nCUSTOMER\n{{ $('Webhook').first().json.body.customer.fullName }}\n{{ $('Webhook').first().json.body.customer.email }}\n{{ $('Webhook').first().json.body.customer.phone }}\n\nINTERESTED IN\n{{ (() => { const names = { 'lead-management': 'Lead Management', 'ai-customer-support': 'AI Customer Support', 'bookings-scheduling': 'Bookings & Scheduling', 'crm-automation': 'CRM Automation', 'automated-follow-up': 'Automated Follow-Up', 'business-operations': 'Business Operations', 'reporting-insights': 'Reporting & Insights', 'ai-agents': 'AI Agents', 'custom-workflows': 'Custom Workflows', 'business-dashboard': 'Business Dashboard / Client Portal' }; const slugs = $('Webhook').first().json.body.automationInterests || []; return slugs.map((s) => names[s] || s).join(', '); })() }}\n\nWHAT THEY WANT TO AUTOMATE\n{{ $('Webhook').first().json.body.automationDescription || '(not provided)' }}\n\nBOOKING\nService: {{ $('Retrieve Service Details').first().json.name }}\nDate: {{ new Date($('Check Availability').first().json.startTime).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: $('Check Availability').first().json.timezone }) }}\nTime: {{ new Date($('Check Availability').first().json.startTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: $('Check Availability').first().json.timezone }) }}\nTimezone: {{ $('Check Availability').first().json.timezone }}\nReference: BK-{{ $('Create Booking').first().json.id.slice(0,8).toUpperCase() }}\nStatus: Confirmed\n\nNOTES\n{{ $('Webhook').first().json.body.booking.notes || '(none)' }}",
+        "options": {}
+      },
+      "id": "notify_owner",
+      "name": "Notify Business Owner",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        1220,
+        -60
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_ME",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: \"confirmed\", message: \"You're all set. Check your email for details.\", bookingReference: `BK-${$('Create Booking').first().json.id.slice(0,8).toUpperCase()}` } }}"
+      },
+      "id": "respond_confirmed",
+      "name": "Respond: Confirmed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: \"unavailable\", message: \"That time was just taken \u2014 please pick another.\" } }}"
+      },
+      "id": "respond_unavailable",
+      "name": "Respond: Unavailable",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        340,
+        160
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Retrieve Service Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve Service Details": {
+      "main": [
+        [
+          {
+            "node": "Retrieve Business Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve Business Settings": {
+      "main": [
+        [
+          {
+            "node": "Get Existing Bookings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Existing Bookings": {
+      "main": [
+        [
+          {
+            "node": "Check Availability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Availability": {
+      "main": [
+        [
+          {
+            "node": "IF: Is Available",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Is Available": {
+      "main": [
+        [
+          {
+            "node": "Save Customer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond: Unavailable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Customer": {
+      "main": [
+        [
+          {
+            "node": "Create Booking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Booking": {
+      "main": [
+        [
+          {
+            "node": "Create Google Calendar Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Google Calendar Event": {
+      "main": [
+        [
+          {
+            "node": "Update Booking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Booking": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Business Owner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Confirmation Email": {
+      "main": [
+        [
+          {
+            "node": "Respond: Confirmed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
