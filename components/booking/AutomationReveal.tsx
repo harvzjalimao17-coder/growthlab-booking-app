@@ -49,6 +49,8 @@ export function AutomationReveal({ service, date, time, bookingReference }: Auto
   const [y, m, d] = date.split("-").map(Number) as [number, number, number];
   const displayDate = formatDisplayDate(new Date(y, m - 1, d));
   const displayTime = formatDisplayTime(time);
+  // Always display the real n8n booking reference; never use a test reference.
+  const displayReference = bookingReference?.trim() || "—";
 
   return (
     <div className={styles.revealWrap}>
@@ -73,7 +75,7 @@ export function AutomationReveal({ service, date, time, bookingReference }: Auto
         </div>
         <div>
           <span>Reference</span>
-          {bookingReference ?? "\u2014"}
+          {displayReference}
         </div>
       </div>
 

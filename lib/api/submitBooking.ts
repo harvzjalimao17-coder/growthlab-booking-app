@@ -11,6 +11,7 @@ const webhookResponseSchema = z.object({
   // kept as a synonym so earlier workflow versions still validate.
   status: z.enum(["confirmed", "pending_review", "unavailable", "conflict"]),
   message: z.string().optional(),
+
   // The conflict branch sends bookingReference explicitly as null (not
   // omitted), which z.string().optional() rejects -- that mismatch was the
   // actual cause of the reported ZodError. .nullable() accepts null;
@@ -114,13 +115,18 @@ export async function submitBooking(
   const parsed = webhookResponseSchema.safeParse(json);
 
   if (!parsed.success) {
-    console.error("Booking webhook response failed schema validation:", parsed.error);
+    console.error(
+      "Booking webhook response failed schema validation:",
+      parsed.error
+    );
 
     throw new BookingSubmissionError(
       "Received an unexpected response from the booking service.",
       parsed.error
     );
   }
+
+  console.log("REAL N8N BOOKING RESPONSE:", parsed.data);
 
   return parsed.data;
 }
